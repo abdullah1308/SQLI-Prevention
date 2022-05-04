@@ -1,0 +1,21 @@
+.App {
+  text-align: center;
+}
+
+.registration, .login {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+button {
+  max-width: fit-content;
+  align-self: center;
+}
+
+input {
+  padding: 10px;
+  border-radius: 5px;
+}
