@@ -18,11 +18,38 @@ const db = mysql.createPool({
     multipleStatements: true,
 });
 
-app.get("/api/get", (req, res) => {
-    const sqlGet = "SELECT * FROM contacts";
-    db.query(sqlGet, (error, result) => {
-        res.send(result);
-    });
+app.post("/login", (req, res) => {
+    username = req.body.username;
+    password = req.body.password;
+    const dynamicLoginQuery = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
+    const staticLoginQuery = `SELECT * FROM users WHERE username = '' AND password = ''`;
+
+    console.log("RTQ:", dynamicLoginQuery);
+
+    if(compareQueries(staticLoginQuery, dynamicLoginQuery) == true) {
+        db.query(
+            dynamicLoginQuery,
+            [],
+            (err, result) => {
+                if (err) {
+                    res.send({ err: err });
+                    // console.log(1);
+                }
+    
+                if (result.length > 0) {
+                    res.send(result);
+                    // console.log(2);
+                } else {
+                    res.send({ err: "Invalid username or password" });
+                    // console.log(3);
+                }
+            }
+        );
+    } else {
+        res.send({ err: "SQL Injection detected" });
+        // console.log(4);
+    }
+    
 });
 
 app.post("/register", (req, res) => {
@@ -30,36 +57,10 @@ app.post("/register", (req, res) => {
         "INSERT INTO users (username, password) VALUES (?, ?)",
         [req.body.username, req.body.password],
         (err, result) => {
-            if(!err) {
-                res.send({message: "success"})
+            if (!err) {
+                res.send({ message: "success" });
             } else {
-                res.send({err: err})
-            }
-        }
-    );
-});
-
-app.post("/login", (req, res) => {
-    username = req.body.username;
-    password = req.body.password;
-    console.log(
-        `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`
-    );
-    db.query(
-        `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`,
-        [],
-        (err, result) => {
-            if (err) {
                 res.send({ err: err });
-                // console.log(1);
-            }
-
-            if (result.length > 0) {
-                res.send(result);
-                // console.log(2);
-            } else {
-                res.send({ err: "Invalid username or password" });
-                // console.log(3);
             }
         }
     );
@@ -76,13 +77,10 @@ app.post("/api/post", (req, res) => {
     });
 });
 
-app.delete("/api/remove/:id", (req, res) => {
-    const { id } = req.params;
-    const sqlRemove = "DELETE FROM contacts WHERE id = ?";
-    db.query(sqlRemove, id, (error, result) => {
-        if (error) {
-            console.log(error);
-        }
+app.get("/api/get", (req, res) => {
+    const sqlGet = "SELECT * FROM contacts";
+    db.query(sqlGet, (error, result) => {
+        res.send(result);
     });
 });
 
@@ -98,17 +96,39 @@ app.get("/api/get/:id", (req, res) => {
 });
 
 app.put("/api/update/:id", (req, res) => {
-  const { id } = req.params;
-  const {name, email, contact} = req.body;
-  const sqlUpdate = "UPDATE contacts SET name = ?, email = ?, contact = ? WHERE id = ?";
-  db.query(sqlUpdate, [name, email, contact, id], (error, result) => {
-      if (error) {
-          console.log(error);
-      }
-      res.send(result);
-  });
+    const { id } = req.params;
+    const { name, email, contact } = req.body;
+    const sqlUpdate =
+        "UPDATE contacts SET name = ?, email = ?, contact = ? WHERE id = ?";
+    db.query(sqlUpdate, [name, email, contact, id], (error, result) => {
+        if (error) {
+            console.log(error);
+        }
+        res.send(result);
+    });
+});
+
+app.delete("/api/remove/:id", (req, res) => {
+    const { id } = req.params;
+    const sqlRemove = "DELETE FROM contacts WHERE id = ?";
+    db.query(sqlRemove, id, (error, result) => {
+        if (error) {
+            console.log(error);
+        }
+    });
 });
 
 app.listen(3001, () => {
     console.log("Server is running on port 3001");
 });
+
+// Utils
+
+// Compares the dynamic and static sql query after removing parameter values
+function compareQueries(staticQuery, dynamicQuery) {
+    
+    var delDynamicQuery = dynamicQuery.replace(/'(?:(?!'|')[\s\S])*'/g, '\'\'');
+    console.log("DRTQ:", delDynamicQuery);
+
+    return delDynamicQuery == staticQuery;
+}

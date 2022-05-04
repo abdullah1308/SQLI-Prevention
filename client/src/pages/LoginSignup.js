@@ -35,7 +35,7 @@ function LoginSignup() {
                 toast.success("Login successful");
                 navigate("/data");
             } else {
-                toast.error("Invalid username or password");
+                toast.error(res.data.err);
             }
         });
     };
