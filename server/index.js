@@ -24,9 +24,13 @@ app.post("/login", (req, res) => {
     const dynamicLoginQuery = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
     const staticLoginQuery = `SELECT * FROM users WHERE username = '' AND password = ''`;
 
+    console.log("FXQ:", staticLoginQuery);
     console.log("RTQ:", dynamicLoginQuery);
+    var comparisonResult = compareQueries(staticLoginQuery, dynamicLoginQuery);
+    console.log("Comparison Result:", comparisonResult);
+    console.log("---------------------------------------------------------------------------------------------------------------------");
 
-    if(compareQueries(staticLoginQuery, dynamicLoginQuery) == true) {
+    if(comparisonResult == true) {
         db.query(
             dynamicLoginQuery,
             [],
