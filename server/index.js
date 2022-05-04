@@ -2,6 +2,7 @@ const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const crypto = require("crypto");
 
 const app = express();
 
@@ -24,9 +25,13 @@ app.post("/login", (req, res) => {
     const dynamicLoginQuery = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
     const staticLoginQuery = `SELECT * FROM users WHERE username = '' AND password = ''`;
 
+    console.log("FXQ:", staticLoginQuery);
     console.log("RTQ:", dynamicLoginQuery);
+    var comparisonResult = compareQueries(staticLoginQuery, dynamicLoginQuery);
+    console.log("Comparison Result:", comparisonResult);
+    console.log("---------------------------------------------------------------------------------------------------------------------");
 
-    if(compareQueries(staticLoginQuery, dynamicLoginQuery) == true) {
+    if(comparisonResult == true) {
         db.query(
             dynamicLoginQuery,
             [],
@@ -124,11 +129,16 @@ app.listen(3001, () => {
 
 // Utils
 
-// Compares the dynamic and static sql query after removing parameter values
+// Compares the dynamic and static sql query after removing parameter values and hashing them with sha512
 function compareQueries(staticQuery, dynamicQuery) {
     
     var delDynamicQuery = dynamicQuery.replace(/'(?:(?!'|')[\s\S])*'/g, '\'\'');
     console.log("DRTQ:", delDynamicQuery);
 
-    return delDynamicQuery == staticQuery;
+    var hashedFXQ = crypto.createHash("sha512").update(staticQuery).digest("hex");
+    console.log("Hashed FXQ:\n", hashedFXQ);
+    var hashedDRTQ = crypto.createHash('sha512').update(delDynamicQuery).digest('hex');
+    console.log("Hashed DRTQ:\n", hashedDRTQ);
+
+    return hashedFXQ == hashedDRTQ;
 }
