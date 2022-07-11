@@ -14,8 +14,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const db = mysql.createPool({
     user: "root",
     host: "localhost",
-    password: "#A8273553b",
-    database: "project_290",
+    password: "",
+    database: "",
     multipleStatements: true,
 });
 
